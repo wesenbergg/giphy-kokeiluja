@@ -1,26 +1,40 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState } from 'react';
+import SearchGiphy from './SearchGiphy';
+import FetchGiphy from './FetchGiphy';
+// {/* <FetchGiphy />
+//     <SearchGiphy /> */}
 
-function App() {
+const App = () => {
+  const [search, setSearch] = useState('')
+  const [data, setData] = useState()
+  
+  //Vaihtoehtoinen url https://nominatim.openstreetmap.org/search?city=Helsinki&format=geocodejson
+  const handleFetch = () => {
+    fetch('https://geocode-maps.yandex.ru/1.x?apikey='+ process.env.REACT_APP_YANDEX_API +'&lang=en&format=json&geocode='+search)
+    .then(res => res.json())
+    .then(res => {
+      // console.log(res.response.GeoObjectCollection.featureMember);
+      if(res && res.response && res.response.GeoObjectCollection)
+        setData(res.response.GeoObjectCollection.featureMember)
+    })
+  }
+
+  // console.log(data);
+  const showResult = () => data.map(({ GeoObject }) => <li key={Math.random()}>
+    {GeoObject.name} {GeoObject.description} [{GeoObject.Point.pos}]
+  </li> );
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <ul>
+        {data ? showResult(): ''}
+      </ul>
+      <input value={search} onChange={(e) => setSearch(e.target.value)} />
+      <button onClick={handleFetch} >search</button>
     </div>
   );
 }
 
 export default App;
+
